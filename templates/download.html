@@ -16,6 +16,12 @@
     />
     <link rel="canonical" href="https://yt.ankitsoni.in/" />
     <!-- Updated Canonical URL -->
+    <!-- Favicon -->
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='favicon.png') }}"
+    />
 
     <!-- Open Graph Meta Tags (for social sharing) -->
     <meta
@@ -29,7 +35,12 @@
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://yt.ankitsoni.in/" />
     <!-- Updated OG URL -->
-    <meta property="og:image" content="https://yt.ankitsoni.in/og-image.png" />
+    <
+    <meta
+      property="og:image"
+      content="{{ url_for('static', filename='og-image.png', _external=True) }}"
+    />
+
     <!-- Optional: Add a path to an image for social previews -->
 
     <!-- Tailwind CSS & Google Fonts -->
