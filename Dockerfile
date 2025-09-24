@@ -22,8 +22,8 @@ COPY . .
 RUN mkdir -p /app/downloads
 
 # Expose the port the app runs on
-EXPOSE 8000
+EXPOSE 5123
 
 # Run the app using gunicorn, a production-ready WSGI server
 # This is more robust than Flask's built-in development server
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "index:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5123", "--workers", "4", "index:app"]

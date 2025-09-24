@@ -1,0 +1,48 @@
+Python Virtual Environments
+Never commit your virtual environment folder
+venv/
+.venv/
+env/
+.env/
+ENV/
+env.bak/
+venv.bak/
+
+Python bytecode and cache
+These are auto-generated files
+pycache/
+*.pyc
+*.pyo
+*.pyd
+
+--- Project Specific ---
+CRUCIAL: Ignore the folder where downloaded videos are saved.
+This prevents large video files from being pushed to GitHub.
+/downloads/
+
+IDE and Editor Configurations
+User-specific settings for editors like VS Code or PyCharm
+.vscode/
+.idea/
+*.suo
+.ntvs
+*.njsproj
+*.sln
+*.swp
+
+Operating System generated files
+Annoying system files that should not be in the repo
+.DS_Store
+Thumbs.db
+._*
+
+Environment variables
+Keep secret keys and environment settings out of the repository
+.env
+.env.local
+.env.*.local
+
+Build and distribution artifacts
+build/
+dist/
+*.egg-info/
