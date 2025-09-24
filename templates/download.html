@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- SEO Meta Tags -->
+    <title>Free 4K YouTube Video Downloader - Download in HD, MP4 & MP3</title>
+    <meta
+      name="description"
+      content="The ultimate free tool to download YouTube videos in stunning 4K and 8K resolution. Quickly convert and save videos as MP4 or extract high-quality MP3 audio. No software, no registration required."
+    />
+    <meta
+      name="keywords"
+      content="youtube downloader, 4k video downloader, free youtube downloader, download youtube video, youtube to mp4, youtube to mp3, hd video downloader"
+    />
+    <link rel="canonical" href="https://yt.ankitsoni.in/" />
+    <!-- Updated Canonical URL -->
+
+    <!-- Open Graph Meta Tags (for social sharing) -->
+    <meta
+      property="og:title"
+      content="Free 4K YouTube Video Downloader - Download in HD, MP4 & MP3"
+    />
+    <meta
+      property="og:description"
+      content="Easily download YouTube videos in the highest quality available, including 4K and 8K. Our free online tool also supports high-quality MP3 audio extraction."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://yt.ankitsoni.in/" />
+    <!-- Updated OG URL -->
+    <meta property="og:image" content="https://yt.ankitsoni.in/og-image.jpg" />
+    <!-- Optional: Add a path to an image for social previews -->
+
+    <!-- Tailwind CSS & Google Fonts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      body {
+        font-family: "Inter Tight", sans-serif;
+        scroll-behavior: smooth;
+      }
+      .hidden {
+        display: none;
+      }
+      .progress-bar-transition {
+        transition: width 0.3s ease-in-out;
+      }
+      .icon {
+        width: 1.5rem;
+        height: 1.5rem;
+      }
+      .feature-icon {
+        width: 2.5rem;
+        height: 2.5rem;
+      }
+      .gradient-text {
+        background: linear-gradient(90deg, #ff7700, #ff5000);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 text-gray-800 antialiased">
+    <!-- Header/Hero Section -->
+    <header class="bg-white shadow-sm">
+      <nav
+        class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center"
+      >
+        <h1 class="text-2xl font-bold gradient-text">YT Downloader</h1>
+        <a
+          href="#features"
+          class="text-gray-600 hover:text-[#ff7700] transition"
+          >Features</a
+        >
+      </nav>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20">
+      <!-- Downloader Tool Section -->
+      <section class="text-center">
+        <h2
+          class="text-4xl sm:text-6xl font-extrabold text-gray-900 leading-tight"
+        >
+          The Ultimate <span class="gradient-text">4K Video Downloader</span>
+        </h2>
+        <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+          Paste any YouTube URL below to download videos in the highest
+          quality—for free. Instantly convert to MP4 or extract high-fidelity
+          MP3 audio.
+        </p>
+
+        <div
+          id="downloader-widget"
+          class="bg-white rounded-xl shadow-2xl p-6 sm:p-8 max-w-4xl w-full mx-auto mt-10"
+        >
+          <!-- URL Input Form -->
+          <form id="url-form" class="mb-4">
+            <div class="flex flex-col sm:flex-row gap-3">
+              <input
+                type="url"
+                id="video-url-input"
+                class="flex-grow p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff7700] transition text-lg"
+                placeholder="https://www.youtube.com/watch?v=..."
+                required
+              />
+              <button
+                type="submit"
+                class="bg-[#ff7700] text-white font-bold py-4 px-8 rounded-lg hover:bg-[#e66a00] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#ff7700] transition duration-300 flex items-center justify-center gap-2 text-lg"
+              >
+                <svg
+                  id="button-icon"
+                  class="icon"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+                  ></path>
+                </svg>
+                <span id="button-text">Get Video Info</span>
+                <div
+                  id="button-loader"
+                  class="hidden animate-spin rounded-full h-5 w-5 border-b-2 border-white"
+                ></div>
+              </button>
+            </div>
+          </form>
+
+          <div
+            id="error-container"
+            class="hidden bg-red-100 border-l-4 border-red-500 text-red-800 p-4 my-4 rounded-lg"
+            role="alert"
+          >
+            <p id="error-message"></p>
+          </div>
+
+          <!-- Video Details & Download Form -->
+          <div
+            id="video-details"
+            class="hidden mt-6 border-t-2 border-gray-100 pt-6"
+          >
+            <div class="flex flex-col md:flex-row gap-6">
+              <img
+                id="thumbnail"
+                src=""
+                alt="Video Thumbnail"
+                class="w-full md:w-1/3 h-auto rounded-lg shadow-lg object-cover"
+              />
+              <div class="flex-grow text-left">
+                <h3
+                  id="title"
+                  class="text-2xl font-bold text-gray-800 leading-tight"
+                ></h3>
+                <p id="uploader" class="text-gray-600 mt-1 text-lg"></p>
+                <div
+                  class="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-4 text-gray-600"
+                >
+                  <div class="flex items-center gap-2">
+                    <svg
+                      class="icon text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      ></path>
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                      ></path></svg
+                    ><span id="view_count"></span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <svg
+                      class="icon text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                      ></path></svg
+                    ><span id="duration"></span>
+                  </div>
+                  <div class="flex items-center gap-2 font-medium">
+                    <svg
+                      class="icon text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 1v4m0 0h-4m4 0l-5-5"
+                      ></path></svg
+                    ><span id="resolution"></span>
+                  </div>
+                </div>
+                <div
+                  id="download-buttons"
+                  class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3"
+                >
+                  <button
+                    id="download-video-btn"
+                    class="w-full bg-green-600 text-white font-bold py-3 px-5 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-300 flex items-center justify-center gap-3 text-md"
+                  >
+                    Download Video
+                  </button>
+                  <button
+                    id="download-audio-btn"
+                    class="w-full bg-blue-600 text-white font-bold py-3 px-5 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-300 flex items-center justify-center gap-3 text-md"
+                  >
+                    Download Audio
+                  </button>
+                </div>
+                <div id="progress-section" class="hidden mt-6 text-left">
+                  <p
+                    id="progress-title"
+                    class="text-gray-800 text-lg font-bold"
+                  ></p>
+                  <div class="w-full bg-gray-200 rounded-full h-2.5 my-2">
+                    <div
+                      id="progress-bar"
+                      class="bg-[#ff7700] h-2.5 rounded-full progress-bar-transition"
+                      style="width: 0%"
+                    ></div>
+                  </div>
+                  <p
+                    id="progress-text"
+                    class="text-gray-500 text-sm w-full truncate h-5"
+                  ></p>
+                  <button
+                    id="start-new-download"
+                    class="hidden mt-4 bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700 transition"
+                  >
+                    Start New Download
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Features Section -->
+      <section id="features" class="py-20 sm:py-32">
+        <div class="max-w-5xl mx-auto text-center">
+          <h2 class="text-3xl font-bold text-gray-900">
+            Why Choose Our Downloader?
+          </h2>
+          <p class="mt-4 text-lg text-gray-600">
+            We provide the best features to make your download experience fast,
+            easy, and secure.
+          </p>
+        </div>
+        <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+          <!-- Feature 1 -->
+          <div class="bg-white p-8 rounded-xl shadow-lg">
+            <div class="bg-orange-100 rounded-full p-3 w-max">
+              <svg
+                class="feature-icon text-[#ff7700]"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9V3m-9 9h18"
+                ></path>
+              </svg>
+            </div>
+            <h3 class="mt-5 text-xl font-bold">Unmatched Quality</h3>
+            <p class="mt-2 text-gray-600">
+              Download videos in their original quality, from standard HD up to
+              glorious 4K and 8K. Don't settle for less.
+            </p>
+          </div>
+          <!-- Feature 2 -->
+          <div class="bg-white p-8 rounded-xl shadow-lg">
+            <div class="bg-orange-100 rounded-full p-3 w-max">
+              <svg
+                class="feature-icon text-[#ff7700]"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"
+                ></path>
+              </svg>
+            </div>
+            <h3 class="mt-5 text-xl font-bold">Audio Extraction</h3>
+            <p class="mt-2 text-gray-600">
+              Easily extract and download high-quality MP3 audio from any video.
+              Perfect for podcasts, music, and lectures.
+            </p>
+          </div>
+          <!-- Feature 3 -->
+          <div class="bg-white p-8 rounded-xl shadow-lg">
+            <div class="bg-orange-100 rounded-full p-3 w-max">
+              <svg
+                class="feature-icon text-[#ff7700]"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13 10V3L4 14h7v7l9-11h-7z"
+                ></path>
+              </svg>
+            </div>
+            <h3 class="mt-5 text-xl font-bold">Completely Free & Fast</h3>
+            <p class="mt-2 text-gray-600">
+              Our tool is 100% free to use with no hidden costs or download
+              limits. Our powerful servers ensure your downloads are quick.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ Section -->
+      <section class="py-20 bg-white rounded-xl shadow-lg">
+        <div class="max-w-4xl mx-auto px-4">
+          <h2 class="text-3xl font-bold text-center text-gray-900">
+            Frequently Asked Questions
+          </h2>
+          <div class="mt-8 space-y-4">
+            <div>
+              <h3 class="font-semibold text-lg">
+                Is this 4K video downloader really free?
+              </h3>
+              <p class="text-gray-600 mt-1">
+                Yes, absolutely. Our service is completely free to use without
+                any limitations or the need for registration. You can download
+                as many videos as you like.
+              </p>
+            </div>
+            <div class="border-t border-gray-200 pt-4">
+              <h3 class="font-semibold text-lg">
+                What is the maximum download quality?
+              </h3>
+              <p class="text-gray-600 mt-1">
+                We always provide the highest quality available from YouTube. If
+                a video was uploaded in 4K or 8K, you will be able to download
+                it in that resolution.
+              </p>
+            </div>
+            <div class="border-t border-gray-200 pt-4">
+              <h3 class="font-semibold text-lg">
+                Is it safe and secure to use this website?
+              </h3>
+              <p class="text-gray-600 mt-1">
+                Yes. Your security is our priority. We do not store any of your
+                data or download history. The entire process is automated and
+                secure.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="text-center py-8 border-t">
+      <p class="text-gray-500">
+        &copy; 2024 YT Downloader. All rights reserved.
+      </p>
+    </footer>
+
+    <script>
+      // The JavaScript logic remains the same as the previous version.
+      // It controls the form submission, fetching data, and showing progress.
+      const urlForm = document.getElementById("url-form");
+      const mainContent = document.getElementById("downloader-widget"); // Scoped to the widget
+      const errorContainer = document.getElementById("error-container");
+      const videoDetailsContainer = document.getElementById("video-details");
+      const progressSection = document.getElementById("progress-section");
+      const downloadButtons = document.getElementById("download-buttons");
+
+      let eventSource;
+
+      urlForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const url = document.getElementById("video-url-input").value;
+        setInfoButtonLoading(true);
+        videoDetailsContainer.classList.add("hidden");
+        errorContainer.classList.add("hidden");
+        try {
+          const response = await fetch("/get-video-info", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url }),
+          });
+          const data = await response.json();
+          if (!response.ok)
+            throw new Error(data.error || "Failed to fetch video info.");
+          displayVideoDetails(data, url);
+        } catch (error) {
+          displayError(error.message);
+        } finally {
+          setInfoButtonLoading(false);
+        }
+      });
+
+      document
+        .getElementById("download-video-btn")
+        .addEventListener("click", () => startDownload("video"));
+      document
+        .getElementById("download-audio-btn")
+        .addEventListener("click", () => startDownload("audio"));
+
+      async function startDownload(type) {
+        downloadButtons.classList.add("hidden");
+        progressSection.classList.remove("hidden");
+        const url = document.getElementById("video-url-input").value;
+        try {
+          const response = await fetch("/start-download", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url, type }),
+          });
+          const data = await response.json();
+          if (!response.ok)
+            throw new Error(data.error || "Failed to start download.");
+          listenForProgress(data.task_id);
+        } catch (error) {
+          updateProgressUI({ status: "error", details: error.message });
+        }
+      }
+
+      function listenForProgress(taskId) {
+        eventSource = new EventSource(`/progress-stream/${taskId}`);
+        eventSource.onmessage = (event) => {
+          const data = JSON.parse(event.data);
+          updateProgressUI(data);
+          if (data.status === "complete") {
+            eventSource.close();
+            window.location.href = `/get-file/${data.filename}`;
+          } else if (data.status === "error") {
+            eventSource.close();
+          }
+        };
+        eventSource.onerror = () => {
+          updateProgressUI({
+            status: "error",
+            details: "Connection lost. Could not get progress.",
+          });
+          eventSource.close();
+        };
+      }
+
+      function updateProgressUI(data) {
+        const progressBar = document.getElementById("progress-bar"),
+          progressText = document.getElementById("progress-text"),
+          progressTitle = document.getElementById("progress-title"),
+          newDownloadBtn = document.getElementById("start-new-download");
+        progressBar.style.width = `${data.progress || 0}%`;
+        progressText.textContent = data.details || "";
+        progressTitle.textContent =
+          data.status.charAt(0).toUpperCase() + data.status.slice(1) + "...";
+        if (data.status === "complete") {
+          progressBar.classList.replace("bg-[#ff7700]", "bg-green-500");
+          progressTitle.textContent = "Download Complete!";
+          newDownloadBtn.classList.remove("hidden");
+        } else if (data.status === "error") {
+          progressBar.classList.replace("bg-[#ff7700]", "bg-red-500");
+          progressTitle.textContent = "Download Failed";
+          newDownloadBtn.classList.remove("hidden");
+        }
+      }
+
+      document
+        .getElementById("start-new-download")
+        .addEventListener("click", () => {
+          window.location.reload();
+        });
+
+      function displayVideoDetails(data, url) {
+        document.getElementById("thumbnail").src = data.thumbnail;
+        document.getElementById("title").textContent = data.title;
+        document.getElementById(
+          "uploader"
+        ).textContent = `By: ${data.uploader}`;
+        document.getElementById("duration").textContent = data.duration_string;
+        document.getElementById("view_count").textContent = data.view_count;
+        document.getElementById("resolution").textContent = data.resolution;
+
+        // Reset UI for new video
+        downloadButtons.classList.remove("hidden");
+        progressSection.classList.add("hidden");
+
+        videoDetailsContainer.classList.remove("hidden");
+      }
+
+      function displayError(message) {
+        document.getElementById("error-message").textContent = message;
+        errorContainer.classList.remove("hidden");
+      }
+
+      function setInfoButtonLoading(isLoading) {
+        const button = urlForm.querySelector("button");
+        button.disabled = isLoading;
+        document
+          .getElementById("button-text")
+          .classList.toggle("hidden", isLoading);
+        document
+          .getElementById("button-icon")
+          .classList.toggle("hidden", isLoading);
+        document
+          .getElementById("button-loader")
+          .classList.toggle("hidden", !isLoading);
+      }
+    </script>
+  </body>
+</html>

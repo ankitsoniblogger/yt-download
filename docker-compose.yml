@@ -1,0 +1,23 @@
+version: "3.8"
+
+services:
+  youtube-downloader:
+    # Build the Docker image from the Dockerfile in the current directory
+    build: .
+
+    # Set the container name for easy identification
+    container_name: youtube-downloader
+
+    # Restart policy to ensure the service comes back up if it goes down
+    restart: unless-stopped
+
+    # Port mapping: Expose the container's port 8000 to the host's port 8090
+    # You can change 8090 to any other available port on your server
+    ports:
+      - "8090:8000"
+
+    # Volume mapping: Persist downloaded files on the host machine
+    # This links the '/app/downloads' directory inside the container
+    # to the 'persisted_downloads' directory on your server.
+    volumes:
+      - ./persisted_downloads:/app/downloads
