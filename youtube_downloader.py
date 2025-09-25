@@ -34,15 +34,29 @@ def get_proxy_list():
     random.shuffle(proxies)
     return proxies
 
+def parse_yt_dlp_error(error_string):
+    """
+    --- NEW: Error Handling Function ---
+    Translates complex yt-dlp errors into simple, user-friendly messages.
+    """
+    s = error_string.lower()
+    if 'sign in' in s or 'confirm you' in s or 'cookies' in s or 'rate-limit' in s or 'too many requests' in s:
+        return "The platform is blocking our server due to high traffic. Please try again in a few minutes."
+    if 'private' in s:
+        return "This content is private and cannot be downloaded."
+    if 'unavailable' in s or 'deleted' in s:
+        return "This content is unavailable or has been deleted."
+    if 'geo-restricted' in s or 'not available in your country' in s:
+        return "This content is geo-restricted and not available from our server's location."
+    return "Could not process this link. Please ensure it's a valid, public URL and try again."
+
+
 # --- Core Unified Functions ---
 def get_media_details(url):
     """Fetches details using a list of proxies, retrying on failure."""
     proxies = get_proxy_list()
-    
-    # Always try first without a proxy
     all_attempts = [None] + proxies 
-    
-    last_error = None
+    last_error = "An unknown error occurred. Please check the URL."
 
     for i, proxy in enumerate(all_attempts):
         ydl_opts = {
@@ -58,7 +72,6 @@ def get_media_details(url):
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(url, download=False)
-                # (The rest of the logic is the same if successful)
                 extractor = info.get('extractor_key', '').lower()
                 platform_map = {'instagram': 'instagram', 'pinterest': 'pinterest'}
                 platform = next((p for key, p in platform_map.items() if key in extractor), 'youtube')
@@ -76,23 +89,24 @@ def get_media_details(url):
         except Exception as e:
             last_error = str(e).split('ERROR: ')[-1]
             print(f"Attempt {i+1} failed: {last_error}")
-            continue # Try next proxy
+            continue
 
-    return {"error": f"Failed after {len(all_attempts)} attempts. Last error: {last_error}"}
+    # --- FIX: Use the error handler to create a clean message ---
+    user_friendly_error = parse_yt_dlp_error(last_error)
+    return {"error": user_friendly_error}
 
 
 def download_media(url, download_type='video'):
-    """Downloads media with proxy rotation and retry logic."""
+    """Downloads media with proxy rotation and beautiful error handling."""
     q = queue.Queue()
 
     def download_thread_target(url, download_type, q):
         proxies = get_proxy_list()
         all_attempts = [None] + proxies
-        last_error = None
+        last_error = "An unknown error occurred during download."
         
         for i, proxy in enumerate(all_attempts):
             try:
-                # --- This block runs once per proxy attempt ---
                 ydl_temp = yt_dlp.YoutubeDL({'quiet': True, 'no_warnings': True})
                 info = ydl_temp.extract_info(url, download=False)
                 title = info.get('title', 'media_file')
@@ -114,9 +128,6 @@ def download_media(url, download_type='video'):
 
                 if proxy:
                     ydl_opts['proxy'] = proxy
-                    print(f"Attempt {i+1}: Downloading via proxy {proxy.split('@')[-1]}")
-                else:
-                     print(f"Attempt 1: Downloading directly (no proxy).")
                 
                 if download_type == 'video':
                     ydl_opts['format'] = 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best'
@@ -130,17 +141,18 @@ def download_media(url, download_type='video'):
                 if downloaded_temp_file:
                     os.rename(os.path.join(DOWNLOADS_DIR, downloaded_temp_file), final_filepath)
                     q.put({'status': 'finished', 'filename': final_filename})
-                    return # Exit thread on success
+                    return
                 else:
                     raise Exception('Could not find temporary file after download.')
             
             except Exception as e:
                 last_error = str(e).split('ERROR: ')[-1]
                 print(f"Download attempt {i+1} failed: {last_error}")
-                continue # Try next proxy
+                continue
         
-        # This part is only reached if all attempts fail
-        q.put({'status': 'error', 'message': f"All download attempts failed. Last error: {last_error}"})
+        # --- FIX: Use the error handler to create a clean message ---
+        user_friendly_error = parse_yt_dlp_error(last_error)
+        q.put({'status': 'error', 'message': user_friendly_error})
 
 
     thread = threading.Thread(target=download_thread_target, args=(url, download_type, q), daemon=True)
