@@ -26,8 +26,19 @@ def format_duration(seconds):
 
 # --- Core Unified Functions ---
 def get_media_details(url):
-    """Fetches details for a URL using yt-dlp."""
-    ydl_opts = {'quiet': True, 'no_warnings': True, 'dump_single_json': True, 'nocolor': True}
+    """Fetches details for a URL using yt-dlp, with proxy support."""
+    ydl_opts = {
+        'quiet': True,
+        'no_warnings': True,
+        'dump_single_json': True,
+        'nocolor': True,
+    }
+    # --- PROXY INTEGRATION: Read from environment variables ---
+    proxy = os.environ.get('PROXY_URL')
+    if proxy:
+        ydl_opts['proxy'] = proxy
+        print("Using proxy for fetching details.")
+
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
@@ -61,7 +72,7 @@ def get_media_details(url):
 
 def download_media(url, download_type='video'):
     """
-    Downloads media using a standardized, secure filename to prevent "Not Found" errors.
+    Downloads media using a standardized, secure filename and proxy support.
     """
     q = queue.Queue()
 
@@ -71,8 +82,6 @@ def download_media(url, download_type='video'):
             info = ydl_temp.extract_info(url, download=False)
             title = info.get('title', 'media_file')
             
-            # --- DEFINITIVE FIX: Use secure_filename for sanitization ---
-            # This ensures the filename created here perfectly matches the one the server looks for.
             base_filename = os.path.splitext(secure_filename(title))[0] or 'media_file'
             final_extension = 'mp4' if download_type == 'video' else 'mp3'
             final_filename = f"{base_filename}.{final_extension}"
@@ -91,6 +100,12 @@ def download_media(url, download_type='video'):
                 'merge_output_format': 'mp4',
                 'nocolor': True,
             }
+
+            # --- PROXY INTEGRATION: Read from environment variables ---
+            proxy = os.environ.get('PROXY_URL')
+            if proxy:
+                ydl_opts['proxy'] = proxy
+                print("Using proxy for download.")
             
             if download_type == 'video':
                 ydl_opts['format'] = 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best'
