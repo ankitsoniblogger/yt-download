@@ -2,3 +2,4 @@ Flask
 gunicorn
 yt-dlp
 gevent
+python-dotenv

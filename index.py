@@ -4,6 +4,10 @@ from flask import Flask, render_template, request, jsonify, send_from_directory,
 from werkzeug.utils import secure_filename, safe_join
 from youtube_downloader import get_media_details, download_media
 from gevent.pywsgi import WSGIServer
+from dotenv import load_dotenv
+
+# --- FIX: Load environment variables from .env file for local development ---
+load_dotenv()
 
 app = Flask(__name__, static_url_path='/static')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 # 16 MB max request size
@@ -47,7 +51,6 @@ def get_file(filename):
     safe_filename = secure_filename(filename)
     safe_path = safe_join(DOWNLOADS_DIR, safe_filename)
     
-    # --- FIX: Check for the file, and if not found, try the alternative extension ---
     if not os.path.exists(safe_path):
         name, ext = os.path.splitext(safe_filename)
         if ext.lower() == '.mp3':
@@ -59,7 +62,6 @@ def get_file(filename):
             if os.path.exists(alternative_path):
                 safe_path = alternative_path
 
-    # If still not found after checking alternatives, return 404
     if not os.path.exists(safe_path):
         return "File not found.", 404
 
