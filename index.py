@@ -1,91 +1,81 @@
 import os
 import sys
-import json
-import subprocess
-from flask import Flask, render_template, request, jsonify, Response, send_from_directory
-from urllib.parse import urlparse
-
-# Import the unified downloader functions
+from flask import Flask, render_template, request, jsonify, send_from_directory, send_file, after_this_request
+from werkzeug.utils import secure_filename, safe_join
 from youtube_downloader import get_media_details, download_media
+from gevent.pywsgi import WSGIServer
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static')
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 # 16 MB max request size
 
-# --- Helper Functions ---
-def is_youtube_url(url):
-    parsed_url = urlparse(url)
-    return "youtube.com" in parsed_url.netloc or "youtu.be" in parsed_url.netloc
+# --- Constants ---
+DOWNLOADS_DIR = '/app/downloads' if os.path.exists('/app') else 'downloads'
+if not os.path.exists(DOWNLOADS_DIR):
+    os.makedirs(DOWNLOADS_DIR)
 
-def is_instagram_url(url):
-    parsed_url = urlparse(url)
-    return "instagram.com" in parsed_url.netloc
-
-def is_pinterest_url(url):
-    parsed_url = urlparse(url)
-    return "pinterest." in parsed_url.netloc or "pin.it" in parsed_url.netloc
-
-
-# --- Flask Routes ---
+# --- Routes ---
 @app.route('/')
 def index():
     return render_template('download.html')
 
 @app.route('/get-video-info', methods=['POST'])
-def get_video_info():
-    url = request.json.get('url')
+def get_video_info_route():
+    data = request.get_json()
+    url = data.get('url')
     if not url:
         return jsonify({"error": "URL is required."}), 400
-
-    if not (is_youtube_url(url) or is_instagram_url(url) or is_pinterest_url(url)):
-        return jsonify({"error": "Invalid URL. Please enter a valid YouTube, Instagram, or Pinterest URL."}), 400
-
-    print(f"Fetching details for URL: {url}")
     details = get_media_details(url)
-    
-    if "error" in details:
+    if details.get("error"):
         return jsonify(details), 400
-    
     return jsonify(details)
 
-
-@app.route('/download', methods=['GET'])
-def download():
+@app.route('/download')
+def download_route():
     url = request.args.get('url')
     download_type = request.args.get('type', 'video')
-    
     if not url:
-        return "Error: URL parameter is missing.", 400
-
+        return "URL parameter is missing", 400
     return download_media(url, download_type)
 
 @app.route('/get-file/<filename>')
 def get_file(filename):
     """
-    Serves the downloaded file to the user's browser.
+    Serves a file for download and then deletes it from the server.
+    This prevents the server's disk from filling up.
+    Includes a fallback for mismatched extensions to fix "Not Found" errors.
     """
-    downloads_dir = '/app/downloads' if os.path.exists('/app') else 'downloads'
-    safe_path = os.path.join(downloads_dir, filename)
-    if not os.path.isfile(safe_path):
+    safe_filename = secure_filename(filename)
+    safe_path = safe_join(DOWNLOADS_DIR, safe_filename)
+    
+    # --- FIX: Check for the file, and if not found, try the alternative extension ---
+    if not os.path.exists(safe_path):
+        name, ext = os.path.splitext(safe_filename)
+        if ext.lower() == '.mp3':
+            alternative_path = safe_join(DOWNLOADS_DIR, name + '.mp4')
+            if os.path.exists(alternative_path):
+                safe_path = alternative_path
+        elif ext.lower() == '.mp4':
+            alternative_path = safe_join(DOWNLOADS_DIR, name + '.mp3')
+            if os.path.exists(alternative_path):
+                safe_path = alternative_path
+
+    # If still not found after checking alternatives, return 404
+    if not os.path.exists(safe_path):
         return "File not found.", 404
 
-    return send_from_directory(downloads_dir, filename, as_attachment=True)
-
-
-# --- Main Execution (for local development) ---
-def check_command(command):
-    try:
-        subprocess.run([command, '--version'], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        return True
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        return False
+    @after_this_request
+    def remove_file(response):
+        try:
+            os.remove(safe_path)
+            print(f"Removed temporary file: {safe_path}")
+        except Exception as error:
+            print(f"Error removing file {safe_path}: {error}")
+        return response
+    
+    return send_file(safe_path, as_attachment=True)
 
 if __name__ == '__main__':
-    if not check_command('yt-dlp'):
-        print("❌ Fatal Error: 'yt-dlp' not found. Please run: pip install yt-dlp")
-        sys.exit(1)
-    if not check_command('ffmpeg'):
-        print("❌ Warning: 'ffmpeg' not found. Downloads for high-quality formats might fail.")
-
-    print("✅ yt-dlp and ffmpeg checks passed.")
-    print(f"🌍 Starting Flask web server at http://127.0.0.1:5123")
-    app.run(host='0.0.0.0', port=5123, debug=True)
+    print("🌍 Starting web server with gevent at http://127.0.0.1:5123")
+    http_server = WSGIServer(('0.0.0.0', 5123), app)
+    http_server.serve_forever()
 
